@@ -39,12 +39,3 @@ X = ct.fit_transform(X)
 
 labelEncoder_y = LabelEncoder()
 y = labelEncoder_y.fit_transform(y)
- 
-y
-#Splitting the dataset into the training set and test dataset
-
-from sklearn import cross
-
-
-
-
