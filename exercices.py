@@ -1,0 +1,1 @@
+# dictionnaire k:v#k = 0 - 20# v = k **2dico = {k:k**2 for k in range(1,20)}dico
