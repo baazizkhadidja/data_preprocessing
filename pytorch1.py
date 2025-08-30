@@ -38,8 +38,8 @@ class Tokenizer:
                     self.vocab[token]+=1
                 else:
                     self.vocab[token]=1
-        self.w2i = {k:idx for idx, (k,v) in enumerate((self.vocab))}
-        self.i2w = {v:k for (k,v) in  self.w2i .items()}
+        self.w2i = {k:idx for idx, k in enumerate(self.vocab)}
+        self.i2w = {idx:k for k, idx in  self.w2i.items()}
         
  #Import stop words       
 from nltk.corpus import stopwords
