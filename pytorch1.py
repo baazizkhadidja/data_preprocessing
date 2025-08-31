@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import nltk
-
+import torch
+from torch.utils.data import dataset
 
 
 train_data, test_data = datasets.load_dataset("imdb", split=["train", "test"])
@@ -13,7 +14,6 @@ train_data
 train_text
 
 seq_len=[len(text.split()) for text in train_text]
-
 
 plt.hist(seq_len)
 plt.show()
@@ -72,7 +72,6 @@ from nltk.corpus import stopwords
 
 nltk.download('stopwords')
 
-#Import punctuation
 
 import string
 
@@ -95,6 +94,50 @@ tokenizer.detokenize(tokenizer.tokenize(train_text[2], truncation=True))
 
 #tokenizer.tokenize(train_text[0], truncation=True)
 
+
+class CustomDataset:
+    def __init__(self, train_text, tokenizer):
+        """
+        Initialize the dataset with data and targets.
+        Args:
+            data: The input data (e.g., features).
+            targets: The corresponding labels or targets.
+        """
+        self.train_text = train_text 
+        self.tokenizer = tokenizer
+    def __len__(self):
+        """
+        return the total number of samples.
+        """
+        return idxs, label
+
+    def __getitem__(self, idx):
+        """
+        Retrieve a sample and its target at the given index
+        """
+        text, label = self.train_data[idx]['text'] , self.train_data[idx]['label'] 
+            
+            
+        idxs = np.array(self.tokenizer.tokenize(text, truncation=True)).astype('int32')
+        return self.train_text[idx], self.tokenizer[idx]
+
+
+
+    # Example usage
+data = torch.tensor(([1,2], [3,4], [5,6]))
+targets = torch.tensor([0,1,0])
+dataset = CustomDataset(data, targets)
+
+ #print("Number of samples: ",len(dataset))
+# print("First sample: ", dataset[0])
+  
+  
+idx = 99
+
+text, label = train_data[idx]['text'] , train_data[idx]['label'] 
+    
+    
+np.array(tokenizer.tokenize(text, truncation=True)).astype('int32')
         
         
         
