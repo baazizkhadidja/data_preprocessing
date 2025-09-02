@@ -4,7 +4,7 @@ import numpy as np
 
 import nltk
 import torch
-from torch.utils.data import dataset
+from torch.utils.data import Dataset, DataLoader
 
 
 train_data, test_data = datasets.load_dataset("imdb", split=["train", "test"])
@@ -95,32 +95,52 @@ tokenizer.detokenize(tokenizer.tokenize(train_text[2], truncation=True))
 #tokenizer.tokenize(train_text[0], truncation=True)
 
 
-class CustomDataset:
-    def __init__(self, train_text, tokenizer):
+class CustomDataset(Dataset):
+    def __init__(self, train_data, tokenizer, return_type='BoG'):
         """
         Initialize the dataset with data and targets.
         Args:
             data: The input data (e.g., features).
             targets: The corresponding labels or targets.
         """
-        self.train_text = train_text 
+        self.train_data = train_data
         self.tokenizer = tokenizer
+        self. return_type=return_type # BoG, Tf-Idf Ids
     def __len__(self):
         """
-        return the total number of samples.
+        Return the total number of samples.
         """
-        return idxs, label
+        return len(self.train_data)
 
     def __getitem__(self, idx):
         """
-        Retrieve a sample and its target at the given index
+        Retrieve a sample and its target at the given index.
         """
-        text, label = self.train_data[idx]['text'] , self.train_data[idx]['label'] 
-            
-            
-        idxs = np.array(self.tokenizer.tokenize(text, truncation=True)).astype('int32')
-        return self.train_text[idx], self.tokenizer[idx]
+        text,label= self.train_data[idx]['text'], self.train_data[idx]['label']
+        if self.return_type=='Ids'  :       
+    
+            idxs= np.array(self.tokenizer.tokenize(text, truncation=True)).astype('int32')
+            return idxs, label
+        elif self.return_type=='BoG':
+            vec=np.zeros(len(self.tokenizer.w2i))
+            idxs= self.tokenizer.tokenize(text)
+            for idx in idxs:
+                vec[idx]+=1
+            return vec, label    
+        else:
+            tf=np.zeros(len(self.tokenizer.w2i))
+            idxs= self.tokenizer.tokenize(text)
+            for idx in idxs:
+                tf[idx]+=1
+            tf/=len(idxs) 
 
+            for i in range(len(tf)):
+                tf[i]*=self.tokenizer.idf[i]
+            return tf, label
+
+
+train_dataset = CustomDataset(train_data, tokenizer,return_type='Tf-Idf' )
+test_dataset = CustomDataset(test_data, tokenizer)
 
 
     # Example usage
@@ -139,5 +159,20 @@ text, label = train_data[idx]['text'] , train_data[idx]['label']
     
 np.array(tokenizer.tokenize(text, truncation=True)).astype('int32')
         
+dataset = CustomDataset(train_data, tokenizer)  
+
+dataset[0]   
+
+#Define a DataLoader
+
+def custom_collate(batch):
+    inputs, targets = zip(*batch)
+    # Example: Convert to tensors or handle variable-length sequences
+    return torch.tensor(inputs), torch.tensor(targets)
+
+dataloader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate)
         
-        
+train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+
+test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+batch=next(iter(train_dataloader))
